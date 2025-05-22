@@ -1,6 +1,6 @@
-# Comasync App
+# apitest
 
-Comasync App is a rest api backend for background jobs and other uses using the
+apitest is a rest api backend for background jobs and other uses using the
 Deno runtime and Oak framework.
 
 ## Pre requisites
