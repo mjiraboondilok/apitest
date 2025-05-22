@@ -3,7 +3,7 @@
 apitest is a rest api backend for background jobs and other uses using the
 Deno runtime and Oak framework.
 
-## Pre requisites
+## Prerequisites
 
 - Make sure you have
   [Deno](https://deno.land/manual@v1.29.1/getting_started/installation)
