@@ -1,10 +1,9 @@
 import {Context, log} from "../../deps.ts";
 import {getEvent} from "../../services/util.ts";
-import {enqueue} from "../../services/enqueue.ts";
 
 const LOG = log.getLogger("users");
 
-export async function signupAll(ctx: Context) {
+export async function signupOne(ctx: Context) {
   const body = await ctx.request.body({ type: "json" }).value;
 
   const response = new ReadableStream<Uint8Array>({
@@ -12,11 +11,6 @@ export async function signupAll(ctx: Context) {
       (async () => {
         try {
           console.log(`You have successfully submitted ${JSON.stringify(body)}`)
-          const signupPromises = []
-          for (const userId of body.userIds) {
-            signupPromises.push(enqueue("/users/signup_one", {userId, profile: body.profile}))
-          }
-          await Promise.all(signupPromises)
         } catch (error) {
           LOG.warning(`Error submitting the task ${body.id}: ${error}`);
         }
