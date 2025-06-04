@@ -1,5 +1,6 @@
 import { Router } from "../deps.ts";
 import example from "./example/index.ts";
+import tasks from "./tasks/index.ts";
 
 // setup the routing
 const router = new Router()
@@ -8,5 +9,8 @@ const router = new Router()
     example.routes(),
     example.allowedMethods(),
   )
+  .use("/tasks",
+    tasks.routes(),
+    tasks.allowedMethods())
 
 export default router;
