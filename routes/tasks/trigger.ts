@@ -2,6 +2,7 @@ import { Context, log } from "../../deps.ts";
 import {getEvent} from "../../services/util.ts";
 import {getClient} from "../../services/supabase.ts";
 import {Database} from "../../types/supabase.ts";
+import {enqueue} from "../../services/enqueue.ts";
 
 const LOG = log.getLogger("tasks");
 
@@ -19,7 +20,7 @@ export async function trigger(ctx: Context) {
           const {data, error} = await supabase.from("async_tasks")
             .select("payload").returns<AsyncTask[]>()
             .eq("id", body.id)
-          console.log(data)
+          await enqueue("/users/signup_all", data[0].payload)
         } catch (error) {
           LOG.warning(`Error submitting the task ${body.id}: ${error}`);
         }
