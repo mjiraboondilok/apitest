@@ -6,7 +6,7 @@ import {enqueue} from "../../services/enqueue.ts";
 
 const LOG = log.getLogger("tasks");
 
-type AsyncTask = Database['public']['Tables']['async_tasks']['Row']
+export type AsyncTask = Database['public']['Tables']['async_tasks']['Row']
 
 export async function trigger(ctx: Context) {
   const supabase = getClient()
@@ -17,10 +17,10 @@ export async function trigger(ctx: Context) {
       (async () => {
         try {
           console.log(`You have successfully submitted the task ${body.id}`)
-          const {data, error} = await supabase.from("async_tasks")
+          const {data} = await supabase.from("async_tasks")
             .select("payload").returns<AsyncTask[]>()
             .eq("id", body.id)
-          await enqueue("/users/signup_all", data[0].payload)
+          await enqueue("/users/signup_all", {taskId: body.id, ...data[0].payload})
         } catch (error) {
           LOG.warning(`Error submitting the task ${body.id}: ${error}`);
         }

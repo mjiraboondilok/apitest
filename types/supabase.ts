@@ -36,18 +36,21 @@ export type Database = {
     Tables: {
       async_tasks: {
         Row: {
+          created_at: string
           endpoint: string
           id: string
           payload: Json
           status: Database["public"]["Enums"]["status"]
         }
         Insert: {
+          created_at?: string
           endpoint: string
           id?: string
           payload: Json
           status?: Database["public"]["Enums"]["status"]
         }
         Update: {
+          created_at?: string
           endpoint?: string
           id?: string
           payload?: Json
@@ -171,18 +174,21 @@ export type Database = {
       }
       user_api: {
         Row: {
+          created_at: string
           email: string
           id: string
           name: string
           profile: Database["public"]["Enums"]["profile"]
         }
         Insert: {
+          created_at?: string
           email?: string
           id: string
           name: string
           profile?: Database["public"]["Enums"]["profile"]
         }
         Update: {
+          created_at?: string
           email?: string
           id?: string
           name?: string

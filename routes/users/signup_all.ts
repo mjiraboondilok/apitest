@@ -1,8 +1,10 @@
 import {Context, log} from "../../deps.ts";
 import {getEvent} from "../../services/util.ts";
 import {enqueue} from "../../services/enqueue.ts";
+import {getClient} from "../../services/supabase.ts";
 
 const LOG = log.getLogger("users");
+const supabase = getClient()
 
 export async function signupAll(ctx: Context) {
   const body = await ctx.request.body({ type: "json" }).value;
@@ -17,8 +19,10 @@ export async function signupAll(ctx: Context) {
             signupPromises.push(enqueue("/users/signup_one", {userId, profile: body.profile}))
           }
           await Promise.all(signupPromises)
+          await supabase.from("async_tasks").update({status: "done"}).eq("id", body.taskId)
         } catch (error) {
-          LOG.warning(`Error submitting the task ${body.id}: ${error}`);
+          LOG.warning(`Error submitting the task ${body.taskId}: ${error}`);
+          await supabase.from("async_tasks").update({status: "error"}).eq("id", body.taskId)
         }
         finally {
           controller.enqueue(
