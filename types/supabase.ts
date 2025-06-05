@@ -38,25 +38,39 @@ export type Database = {
         Row: {
           created_at: string
           endpoint: string
+          errors: string[] | null
           id: string
+          parent_id: string | null
           payload: Json
           status: Database["public"]["Enums"]["status"]
         }
         Insert: {
           created_at?: string
           endpoint: string
+          errors?: string[] | null
           id?: string
+          parent_id?: string | null
           payload: Json
           status?: Database["public"]["Enums"]["status"]
         }
         Update: {
           created_at?: string
           endpoint?: string
+          errors?: string[] | null
           id?: string
+          parent_id?: string | null
           payload?: Json
           status?: Database["public"]["Enums"]["status"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "async_tasks_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "async_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       departments: {
         Row: {
