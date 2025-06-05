@@ -11,10 +11,8 @@ export async function signupOne(ctx: Context) {
   const response = new ReadableStream<Uint8Array>({
     start(controller) {
       (async () => {
-        let taskId = "";
         try {
           console.log(`You have successfully submitted ${JSON.stringify(body)}`)
-          taskId = await insertAsyncTask(body)
           const employee = await getEmployee(body.userId)
           const userId = await createUser(employee.email)
           await insertUserApi({
@@ -25,14 +23,12 @@ export async function signupOne(ctx: Context) {
             profile: body.profile
           })
           await updateAsyncTasks({
-            parentTaskId: body.taskId,
-            taskId,
+            taskId: body.taskId,
             status: "done"})
         } catch (error) {
           LOG.warning(`Error submitting the task ${body.id}: ${error}`);
           await updateAsyncTasks({
-            parentTaskId: body.taskId,
-            taskId,
+            taskId: body.taskId,
             status: "error"})        }
         finally {
           controller.enqueue(
@@ -105,7 +101,6 @@ const insertUserApi = async (userApi: UserApiInsert) => {
 }
 
 type AsyncTasksUpdate = {
-  parentTaskId: string | undefined
   taskId: string
   status: string
 }
@@ -114,12 +109,6 @@ const updateAsyncTasks = async (asyncTasks: AsyncTasksUpdate) => {
   const {error} = await supabase.from("async_tasks").update({status: asyncTasks.status}).eq("id", asyncTasks.taskId)
   if(error) {
     throw new Error(error)
-  }
-  if(asyncTasks.parentTaskId) {
-    const {error} = await supabase.from("async_tasks").update({status: asyncTasks.status}).eq("id", asyncTasks.parentTaskId)
-    if(error) {
-      throw new Error(error)
-    }
   }
   console.log("Updated task status")
 }
