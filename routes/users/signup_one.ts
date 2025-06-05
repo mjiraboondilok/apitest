@@ -16,22 +16,24 @@ export async function signupOne(ctx: Context) {
           console.log(`You have successfully submitted ${JSON.stringify(body)}`)
           taskId = await insertAsyncTask(body)
           const employee = await getEmployee(body.userId)
-          console.log("Retrieved employee", employee)
           const userId = await createUser(employee.email)
-          console.log("Created user", userId)
-          await supabase.from("user_api")
-            .insert({
-              id: userId,
-              email: employee.email,
-              name: `${employee.first_name} ${employee.last_name}`,
-              profile: body.profile})
-          console.log("Created user api")
-          await supabase.from("async_tasks").update({status: "done"}).eq("id", taskId)
-          console.log("Updated task status")
+          await insertUserApi({
+            userId,
+            email: employee.email,
+            first_name: employee.first_name,
+            last_name: employee. last_name,
+            profile: body.profile
+          })
+          await updateAsyncTasks({
+            parentTaskId: body.taskId,
+            taskId,
+            status: "done"})
         } catch (error) {
           LOG.warning(`Error submitting the task ${body.id}: ${error}`);
-          await supabase.from("async_tasks").update({status: "error"}).eq("id", taskId)
-        }
+          await updateAsyncTasks({
+            parentTaskId: body.taskId,
+            taskId,
+            status: "error"})        }
         finally {
           controller.enqueue(
             getEvent("done", `/users completed`),
@@ -65,6 +67,7 @@ const getEmployee = async (id) => {
   if (error) {
     throw new Error(error)
   }
+  console.log("Retrieved employee", data[0])
   return data[0]
 }
 
@@ -76,5 +79,47 @@ const createUser = async (email: string) => {
   if(error) {
     throw new Error(error)
   }
+  console.log("Created user", data.user.id)
   return data.user.id
+}
+
+type UserApiInsert = {
+  userId: string
+  email: string
+  first_name: string
+  last_name: string
+  profile: string
+}
+
+const insertUserApi = async (userApi: UserApiInsert) => {
+  const {error} = await supabase.from("user_api")
+    .insert({
+      id: userApi.userId,
+      email: userApi.email,
+      name: `${userApi.first_name} ${userApi.last_name}`,
+      profile: userApi.profile})
+  if(error) {
+    throw new Error(error)
+  }
+  console.log("Created user api")
+}
+
+type AsyncTasksUpdate = {
+  parentTaskId: string | undefined
+  taskId: string
+  status: string
+}
+
+const updateAsyncTasks = async (asyncTasks: AsyncTasksUpdate) => {
+  const {error} = await supabase.from("async_tasks").update({status: asyncTasks.status}).eq("id", asyncTasks.taskId)
+  if(error) {
+    throw new Error(error)
+  }
+  if(asyncTasks.parentTaskId) {
+    const {error} = await supabase.from("async_tasks").update({status: asyncTasks.status}).eq("id", asyncTasks.parentTaskId)
+    if(error) {
+      throw new Error(error)
+    }
+  }
+  console.log("Updated task status")
 }

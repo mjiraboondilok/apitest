@@ -16,10 +16,9 @@ export async function signupAll(ctx: Context) {
           console.log(`You have successfully submitted ${JSON.stringify(body)}`)
           const signupPromises = []
           for (const userId of body.userIds) {
-            signupPromises.push(enqueue("/users/signup_one", {userId, profile: body.profile}))
+            signupPromises.push(enqueue("/users/signup_one", {taskId: body.taskId, userId, profile: body.profile}))
           }
           await Promise.all(signupPromises)
-          await supabase.from("async_tasks").update({status: "done"}).eq("id", body.taskId)
         } catch (error) {
           LOG.warning(`Error submitting the task ${body.taskId}: ${error}`);
           await supabase.from("async_tasks").update({status: "error"}).eq("id", body.taskId)
